@@ -55,28 +55,42 @@ def crear_usuario(
     cursor.close()
     db.close()
 
+def editar_usuario(db, usuario_id: int, data: dict):
+    cursor = db.cursor()
 
-def editar_usuario_sin_password(
-    user_id: int,
-    username: str,
-    rol: str,
-    empresaId: int
-):
-    conn = get_connection()
-    cursor = conn.cursor()
+    campos = ", ".join([f"{k} = %s" for k in data.keys()])
+    valores = list(data.values())
+    valores.append(usuario_id)
+
+    query = f"""
+        UPDATE usuarios
+        SET {campos}
+        WHERE id = %s
+    """
+
+    cursor.execute(query, valores)
+    db.commit()
+
+def eliminar_usuario(db, usuario_id: int):
+    cursor = db.cursor()
 
     cursor.execute(
         """
-        UPDATE usuarios
-        SET 
-            username = %s,
-            role = %s,
-            empresaId = %s
+        Delete 
+        FROM usuarios
         WHERE id = %s
         """,
-        (username, rol, empresaId, user_id)
+        (usuario_id,)
     )
 
-    conn.commit()
+    cursor.execute(
+        """
+        DELETE FROM usuarios_permisos
+        WHERE usuario_id = %s
+        """,
+        (usuario_id,)
+    )
+    
+    db.commit()
     cursor.close()
-    conn.close()
+    db.close()

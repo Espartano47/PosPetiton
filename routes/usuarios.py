@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File, Form
 from pydantic import BaseModel
-from funtions.usuarios import crear_usuario,obtener_usuarios,obtener_usuario_por_id
+from funtions.usuarios import crear_usuario,obtener_usuarios,obtener_usuario_por_id,editar_usuario,eliminar_usuario
 from config.security import hash_password
 from mysql.connector.errors import IntegrityError
 from funtions.auth import get_current_user 
@@ -86,4 +86,70 @@ def crear_usuario_endpoint(
         raise HTTPException(
             status_code=400,
             detail="El usuario ya existe"
+        )
+
+@router.put("/{usuario_id}")
+def editar_usuario_endpoint(
+    usuario_id: int,
+    user=Depends(get_current_user),
+
+    # CAMPOS EDITABLES
+    Nombre: str = Form(...),
+    Correo: str = Form(...),
+    rol: str = Form(...),
+    username: str = Form(...),
+    foto: Optional[UploadFile] = File(None),
+
+    db = Depends(get_db),
+    permiso_valido=Depends(has_permission("usuarios:update"))
+):
+    try:
+        datos_actualizar = {
+            "nombre": Nombre,
+            "Correo": Correo,
+            "role": rol,
+            "username": username
+        }
+
+        # 🖼️ Si envía nueva foto, se reemplaza
+        if foto:
+            foto_path = guardar_foto_usuario(foto)
+            datos_actualizar["foto"] = foto_path
+
+        editar_usuario(
+            db,
+            usuario_id,
+            datos_actualizar
+        )
+
+        return {"message": "Usuario actualizado correctamente"}
+
+    except IntegrityError:
+        raise HTTPException(
+            status_code=400,
+            detail="El username o correo ya existe"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+    
+@router.delete("/{usuario_id}")
+def eliminar_usuario_endpoint(
+    usuario_id: int,
+    user=Depends(get_current_user),
+    db = Depends(get_db),
+    permiso_valido=Depends(has_permission("usuarios:delete"))
+    ):
+    try:
+        eliminar_usuario( db,
+                usuario_id)
+        
+        return {"message": "Usuario actualizado correctamente"}
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
         )

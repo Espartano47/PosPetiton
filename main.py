@@ -7,6 +7,7 @@ from routes.asistencia import router as asistencia_router
 from routes.vacaciones import router as vacaciones_router
 from routes.auth import router as auth_router
 from routes.usuarios import router as usuarios_router
+from routes.configuraciones import router as configuraciones
 
 app = FastAPI(title="API RRHH con FastAPI")
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
@@ -28,6 +29,7 @@ app.include_router(asistencia_router)
 app.include_router(vacaciones_router)
 app.include_router(auth_router)
 app.include_router(usuarios_router)
+app.include_router(configuraciones)
 
 # @app.get("/")
 # def root():

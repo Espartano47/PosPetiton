@@ -5,7 +5,7 @@ from passlib.context import CryptContext
 # 🔐 Configuración JWT
 SECRET_KEY = "Espartano47"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 1000
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
