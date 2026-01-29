@@ -3,7 +3,7 @@ from jose import jwt
 from passlib.context import CryptContext
 
 # 🔐 Configuración JWT
-SECRET_KEY = "CAMBIA_ESTO_POR_ALGO_SEGURO"
+SECRET_KEY = "Espartano47"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

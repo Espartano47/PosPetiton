@@ -10,3 +10,5 @@ class Empleado(BaseModel):
     salario: float
     fecha_ingreso: date
     estado: str
+    foto: Optional[str]
+    empresaId: int

@@ -15,3 +15,15 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido o expirado"
         )
+
+def has_permission(permiso: str):
+    def dependency(user=Depends(get_current_user)):
+        # user["permisos"] debe venir como lista de strings
+        
+        if permiso not in (user.get("Permisos") or "").split(","):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"No tiene permiso: {permiso}"
+            )
+        return True
+    return dependency
