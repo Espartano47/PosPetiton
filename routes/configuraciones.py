@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from funtions.auth import get_current_user 
 from config.database import get_db
-from funtions.configuraciones import obtener_permisos,obtener_permisosbyuser,agregar_permisosbyuser,eliminar_permisosbyuser
+from funtions.configuraciones import obtener_permisos,obtener_permisosbyuser,agregar_permisosbyuser,eliminar_permisosbyuser,obtener_provincias
 from pydantic import BaseModel
 
 router = APIRouter(
@@ -58,3 +58,12 @@ def quitar_permiso_usuario(
     db=Depends(get_db)
     ):
     return eliminar_permisosbyuser(db,data.usuario_id,data.permiso_id)
+
+
+#Todas las provincias y municipio
+@router.get("/provincias")
+def listapermisosuser(
+    user=Depends(get_current_user),
+    db=Depends(get_db)
+    ):
+    return obtener_provincias(db)

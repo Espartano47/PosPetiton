@@ -6,7 +6,6 @@ from config.database import get_db
 from datetime import datetime, timezone
 from models.usuario import ChangePasswordRequest
 
-
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post("/login")
@@ -24,7 +23,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(),db = Depends(get_db))
     cursor = db.cursor()
     cursor.execute(
         """
-        UPDATE rrhh.usuarios
+        UPDATE usuarios
         SET LastLogin = %s
         WHERE id = %s
         """,
@@ -34,16 +33,15 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(),db = Depends(get_db))
 
     token = create_access_token({
         "sub": user["username"],
-        "role": user["role"],
-        "Permisos":user["permisos"]
+        "role": user["role"]
     })
 
     return {
         "access_token": token,
         "UserLogin": user["username"],
         "forcePasswordChange": user["forcePasswordChange"],
-        "Permisos":user["permisos"],
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "ImagenProfile": user["foto"]
     }
 
 
@@ -56,9 +54,7 @@ def profile(current_user: dict = Depends(get_current_user)):
         "empresaId": current_user["empresaId"],
         "Nombre": current_user["Nombre"],
         "Correo": current_user["Correo"],
-        "NombreEmpresa": current_user["NombreEmpresa"],
-        "Pais": current_user["Pais"],
-        "permisos": current_user["permisos"]
+        "foto": current_user["foto"]
     }
 
 

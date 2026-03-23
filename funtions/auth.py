@@ -13,7 +13,7 @@ def get_user_by_username(username: str):
     cursor = conn.cursor(dictionary=True)
 
     cursor.execute(
-        "SELECT * FROM usuarios_con_empresaa WHERE username = %s",
+        "SELECT * FROM usuarios WHERE username = %s",
         (username,)
     )
 
@@ -23,6 +23,27 @@ def get_user_by_username(username: str):
     conn.close()
     return user
 
+
+def obtener_permisos_usuario(user_id: int):
+
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT p.name
+        FROM usuarios u
+        JOIN roles r ON u.role_id = r.id
+        JOIN role_permissions rp ON r.id = rp.role_id
+        JOIN permissions p ON rp.permission_id = p.id
+        WHERE u.id = %s
+    """, (user_id,))
+
+    permisos = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return [p["name"] for p in permisos]
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
@@ -61,7 +82,7 @@ def cambiar_password_usuario(
 
     # Obtener usuario
     cursor.execute(
-        "SELECT id, password FROM rrhh.usuarios WHERE id = %s",
+        "SELECT id, password FROM usuarios WHERE id = %s",
         (user_id,)
     )
     user = cursor.fetchone()
@@ -92,7 +113,7 @@ def cambiar_password_usuario(
     # Actualizar contraseña y flags
     cursor.execute(
         """
-        UPDATE rrhh.usuarios
+        UPDATE usuarios
         SET password = %s,
             forcePasswordChange = FALSE,
             LastLogin = %s

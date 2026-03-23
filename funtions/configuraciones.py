@@ -40,3 +40,8 @@ def eliminar_permisosbyuser(db,idUsuario,idPermiso):
         raise HTTPException(status_code=404, detail="Permiso no encontrado")
 
     return {"message": "Permiso eliminado correctamente"}
+
+def obtener_provincias(db):
+    cursor = db.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM povincias")
+    return cursor.fetchall()

@@ -2,9 +2,26 @@ from config.database import get_connection
 
 def obtener_usuarios(db):
     cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM usuarios_con_empresaa")
+    cursor.execute("SELECT * FROM usuarios")
     return cursor.fetchall()
 
+
+def obtener_usuario_por_Username(db, usuarioName: str):
+    cursor = db.cursor(dictionary=True)
+    cursor.execute(
+        """
+        SELECT 
+            *
+        FROM usuarios
+        WHERE username = %s
+        """,
+        (usuarioName,)
+    )
+
+    usuario = cursor.fetchone()
+    cursor.close()
+    db.close()
+    return usuario
 
 def obtener_usuario_por_id(db, usuario_id: int):
     cursor = db.cursor(dictionary=True)
@@ -13,7 +30,7 @@ def obtener_usuario_por_id(db, usuario_id: int):
         """
         SELECT 
             *
-        FROM usuarios_con_empresaa
+        FROM usuarios
         WHERE id = %s
         """,
         (usuario_id,)

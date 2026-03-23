@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status, UploadFile, File, Form
 from pydantic import BaseModel
-from funtions.usuarios import crear_usuario,obtener_usuarios,obtener_usuario_por_id,editar_usuario,eliminar_usuario
+from funtions.usuarios import crear_usuario,obtener_usuarios,obtener_usuario_por_id,editar_usuario,eliminar_usuario,obtener_usuario_por_Username
 from config.security import hash_password
 from mysql.connector.errors import IntegrityError
 from funtions.auth import get_current_user 
@@ -21,10 +21,26 @@ def obtener_usuario(
     usuario_id: int,
     user=Depends(get_current_user),
     db=Depends(get_db),
-    permiso_valido=Depends(has_permission("usuarios:read"))
+    # permiso_valido=Depends(has_permission("usuarios:read"))
 ):
     empleado = obtener_usuario_por_id(db, usuario_id)
 
+    if not empleado:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Empleado no encontrado"
+        )
+    return empleado
+
+#obtener por suername
+@router.get("/usuarioValidate/{usuarioname}", response_model=UsuarioOut)
+def obtener_usuario_Username(
+    usuarioname: str,
+    user=Depends(get_current_user),
+    db=Depends(get_db),
+    # permiso_valido=Depends(has_permission("usuarios:read"))
+):
+    empleado = obtener_usuario_por_Username(db, usuarioname)
     if not empleado:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -38,7 +54,7 @@ def obtener_usuario(
 def listarusuarios(
     user=Depends(get_current_user),
     db=Depends(get_db),
-    permiso_valido=Depends(has_permission("usuarios:read"))
+    # permiso_valido=Depends(has_permission("usuarios:read"))
     ):
     return obtener_usuarios(db)
 
@@ -52,7 +68,9 @@ def crear_usuario_endpoint(
     Correo: str = Form(...),
     foto: Optional[UploadFile] = File(None),
     db = Depends(get_db),
-    permiso_valido=Depends(has_permission("usuarios:create"))):
+    # permiso_valido=Depends(has_permission("usuarios:create"))
+    
+    ):
 
     try:
         password_hash = hash_password(password)
@@ -101,7 +119,7 @@ def editar_usuario_endpoint(
     foto: Optional[UploadFile] = File(None),
 
     db = Depends(get_db),
-    permiso_valido=Depends(has_permission("usuarios:update"))
+    # permiso_valido=Depends(has_permission("usuarios:update"))
 ):
     try:
         datos_actualizar = {
@@ -140,7 +158,7 @@ def eliminar_usuario_endpoint(
     usuario_id: int,
     user=Depends(get_current_user),
     db = Depends(get_db),
-    permiso_valido=Depends(has_permission("usuarios:delete"))
+    # permiso_valido=Depends(has_permission("usuarios:delete"))
     ):
     try:
         eliminar_usuario( db,

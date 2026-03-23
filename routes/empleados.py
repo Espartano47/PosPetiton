@@ -16,7 +16,7 @@ from funtions.auth import get_current_user
 router = APIRouter(prefix="/empleados", tags=["Empleados"])
 
 #Todos los empleados
-@router.get("/", response_model=list[Empleado])
+@router.get("/")
 def listar_empleados(
     user=Depends(get_current_user),
     db=Depends(get_db),
@@ -27,13 +27,25 @@ def listar_empleados(
 #crear empleados
 @router.post("/", response_model=Empleado)
 def crear_empleado(
-    nombre: str = Form(...),
-    departamento: str = Form(...),
-    puesto: str = Form(...),
-    salario: float = Form(...),
-    fecha_ingreso: str = Form(...),
-    estado: str = Form(...),
-    foto: Optional[UploadFile] = File(None),
+    identificacion: Optional[str] = Form(None),
+    nombre: Optional[str] = Form(None),
+    apellido: Optional[str] = Form(None),
+    genero: Optional[str] = Form(None),
+    nacimiento: Optional[str] = Form(None),
+    tipoSangre: Optional[str] = Form(None),
+    estadoCivil: Optional[str] = Form(None),
+    bautizado: Optional[str] = Form(None),
+    telefono: Optional[str] = Form(None),
+    celular: Optional[str] = Form(None),
+    correo: Optional[str] = Form(None),
+    Ocupacion: Optional[str] = Form(None),
+    provincia: Optional[str] = Form(None),
+    municipio: Optional[str] = Form(None),
+    sector: Optional[str] = Form(None),
+    direccion: Optional[str] = Form(None),
+    iglesia_id: Optional[int]= Form(None),
+    id_categoria: Optional[int]= Form(None),
+    foto:Optional[UploadFile] = File(None),
     db = Depends(get_db),
     current_user = Depends(get_current_user),
     permiso_valido=Depends(has_permission("empleados:create"))
@@ -45,15 +57,26 @@ def crear_empleado(
 
     # Crear diccionario para insertar en DB
     empleado_data = {
+        "identificacion": identificacion,
         "nombre": nombre,
-        "departamento": departamento,
-        "puesto": puesto,
-        "salario": salario,
-        "fecha_ingreso": fecha_ingreso,
-        "estado": estado,
+        "apellido": apellido,
+        "genero": genero,
+        "nacimiento": nacimiento,
+        "tipoSangre": tipoSangre,
+        "estadoCivil": estadoCivil,
+        "bautizado": bautizado,
+        "telefono": telefono,
+        "celular": celular,
+        "correo": correo,
+        "Ocupacion": Ocupacion,
+        "provincia": provincia,
+        "municipio": municipio,
+        "sector": sector,
+        "direccion": direccion,
+        "iglesia_id":iglesia_id,
+        "id_categoria":id_categoria,
         "foto": foto_path
     }
-    print(current_user)
     # Insertar en DB pasando también quien crea el registro
     empleado_id = insertar_empleado(
         db, 
@@ -67,7 +90,7 @@ def crear_empleado(
 
     return empleado_completo
 
-@router.get("/{empleado_id}", response_model=Empleado)
+@router.get("/{empleado_id}")
 def obtener_empleado(
     empleado_id: int,
     user=Depends(get_current_user),
@@ -100,21 +123,56 @@ def eliminar_empleado_endpoint(
         )
     
 
-@router.put("/{empleado_id}", response_model=Empleado)
+@router.put("/{empleado_id}")
 def actualizar_empleado_endpoint(
     empleado_id: int,
-    empleado: Empleado,
+    identificacion: Optional[str] = Form(None),
+    nombre: Optional[str] = Form(None),
+    apellido: Optional[str] = Form(None),
+    genero: Optional[str] = Form(None),
+    nacimiento: Optional[str] = Form(None),
+    tipoSangre: Optional[str] = Form(None),
+    estadoCivil: Optional[str] = Form(None),
+    bautizado: Optional[str] = Form(None),
+    telefono: Optional[str] = Form(None),
+    celular: Optional[str] = Form(None),
+    correo: Optional[str] = Form(None),
+    Ocupacion: Optional[str] = Form(None),
+    provincia: Optional[str] = Form(None),
+    municipio: Optional[str] = Form(None),
+    sector: Optional[str] = Form(None),
+    direccion: Optional[str] = Form(None),
+    id_iglesia: Optional[str] = Form(None),
+    id_categoria: Optional[str] = Form(None),
     user=Depends(get_current_user),
     db=Depends(get_db),
     permiso_valido=Depends(has_permission("empleados:update"))
-):
-    actualizado = actualizar_empleado(db, empleado_id, empleado)
+):  
+    if id_iglesia in (None, "", "NaN"):
+        id_iglesia = None
+    else:
+        id_iglesia = int(id_iglesia)
 
-    if not actualizado:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Empleado no encontrado"
-        )
+    empleado_data = {
+        "identificacion": identificacion,
+        "nombre": nombre,
+        "apellido": apellido,
+        "genero": genero,
+        "nacimiento": nacimiento,
+        "tipoSangre": tipoSangre,
+        "estadoCivil": estadoCivil,
+        "bautizado": bautizado,
+        "telefono": telefono,
+        "celular": celular,
+        "correo": correo,
+        "Ocupacion": Ocupacion,
+        "provincia": provincia,
+        "municipio": municipio,
+        "sector": sector,
+        "direccion": direccion,
+        "id_iglesia":id_iglesia,
+        "id_categoria":int(id_categoria)
+    }
 
-    empleado.id = empleado_id
-    return empleado
+    actualizar_empleado(db, empleado_id, empleado_data)
+    return {"message": "Usuario actualizado correctamente"}
